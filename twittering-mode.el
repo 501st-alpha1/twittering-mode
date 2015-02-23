@@ -491,6 +491,10 @@ Items:
                       squeeze a series of white spaces.
                       You can use any other specifiers in braces.
  %f - source
+ %e - retweet count - the symbol before the number can be customized by setting
+                      `twittering-retweet-count-symbol'.
+ %F - favorite count - the symbol before the number can be customized by setting
+                      `twittering-favorite-count-symbol'.
  %# - id"
   :type 'string
   :group 'twittering-mode)
@@ -519,6 +523,12 @@ Replacement table:
  %% - % itself."
   :type 'sexp
   :group 'twittering-mode)
+
+(defvar twittering-retweet-count-symbol "↺"
+  "The symbol used for formatting retweet counts")
+
+(defvar twittering-favorite-count-symbol "✶"
+  "The symbol used for formatting favorite counts")
 
 (defcustom twittering-fill-column nil
   "*The `fill-column' used for \"%FILL{...}\" in `twittering-status-format'.
@@ -9000,9 +9010,21 @@ following symbols;
        (format-time-string "%a %b %d %H:%M:%S %z %Y"
 			   (cdr (assq 'created-at ,status-sym)))))
     ("d" . (cdr (assq 'user-description ,status-sym)))
+    ("e" .
+     (let ((retweet-count (cdr (assq 'retweet-count ,status-sym))))
+       (if (and (numberp retweet-count)
+		(> retweet-count 0))
+	   (format "%s%s" twittering-retweet-count-symbol retweet-count)
+	 "")))
     ("f" .
      (twittering-make-string-with-source-property
       (cdr (assq 'source ,status-sym)) ,status-sym))
+    ("F" .
+     (let ((favorite-count (cdr (assq 'favorite-count ,status-sym))))
+       (if (and (numberp favorite-count)
+		(> favorite-count 0))
+	   (format "%s%s" twittering-favorite-count-symbol favorite-count)
+	 "")))
     ("i" .
      (when (and twittering-icon-mode window-system)
        (let ((url
